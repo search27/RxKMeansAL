@@ -1,0 +1,283 @@
+<html>
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width">
+        <meta charset="UTF-8" />
+
+        <script src="./distFiles/RxFramework.js"></script>
+
+        <style>
+            * { box-sizing: border-box; }
+            html, body {
+                margin : 0;
+                padding : 0;
+            }
+            canvas {
+                width: 100%;
+                height: 100%;
+            }
+
+            .title {
+                position: fixed;
+                top: 10px;
+                left: 10px;
+                color : white;
+                letter-spacing: 2px;
+                background: rgba(0, 0, 0, 0.5);
+                padding : 10px 20px;
+                z-index: 99999;   
+            }
+
+            .notice {
+                position: fixed;
+                bottom: 10px;
+                right: 10px;
+                color : white;
+                letter-spacing: 2px;
+                background: rgba(0, 0, 0, 0.5);
+                padding : 10px 20px;
+                z-index: 99999;
+            }
+            .notice * {
+                color: rgb(136, 170, 255);
+            }
+
+            .info {
+                position: fixed;
+                top: 10px;
+                right: 10px;
+                color : white;
+                letter-spacing: 2px;
+                background: rgba(0, 0, 0, 0.5);
+                padding : 10px 20px;
+                z-index: 99999;
+            }
+            .info > div {
+                margin-bottom: 2px;
+            }
+            .info label {
+                display: flex;
+            }
+            .info label span {
+                min-width: 150px;
+            }
+            .info label * { flex : 1; }
+            .info label button {
+                padding : 5px;
+            }
+        </style>
+
+        <script>
+
+
+            const NextStep = () => {
+                const nn = kMeans.SetKMeansNextStep();
+                n = kMeans.GetKMeansNewCentroid();
+                cluster = kMeans.GetCluster();
+                ncentroids = kMeans.GetCentroid();
+                DoTriangles();
+            };
+
+            const DrawCircle = () => {
+                DelaunaryTriangulation.Properties.isDrawOCircle = !DelaunaryTriangulation.Properties.isDrawOCircle;
+            }
+
+            const DrawTriangle = () => {
+                DelaunaryTriangulation.Properties.isDrawTriangle = !DelaunaryTriangulation.Properties.isDrawTriangle;
+            }
+
+            const DrawPoint = () => {
+                DelaunaryTriangulation.Properties.isDrawPoints = !DelaunaryTriangulation.Properties.isDrawPoints;
+            }
+
+
+            const init = () => {
+                kMeans = new KMeansAL();
+
+                DelaunaryTriangulation.Properties = {
+                    isDrawOCircle : true,
+                    isDrawTriangle : false,
+                    isDrawPoints : true,
+                    O_CIRCLE_COLOR : `rgba(0, 0, 0, .1)`,
+                    O_CIRCLE_LINE_WIDTH : 1,
+
+                    TR_SIDES_COLOR : `rgba(255, 0, 0, 1)`,
+                    TR_SIDES_LINE_WIDTH : 1,
+
+                    POINT_COLOR : `rgba(0, 0, 0, 1)`,
+                    POINT_RADIUS : 2,
+
+                    O_POINT_COLOR : `rgba(0, 0, 0, 1)`,
+                    O_POINT_RADIUS : 2,
+                };
+
+
+                canvas = document.createElement('CANVAS');
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                document.body.appendChild(canvas);
+                ctx = canvas.getContext('2d');
+
+
+                for(let i = 0; i < 100; i++){
+                    const x = Math.round(Math.random() * document.body.offsetWidth);
+                    const y = Math.round(Math.random() * document.body.offsetHeight);
+                    points.push({ points : [x, y] });
+                }
+
+                kMeans.SetKMeans(points.length / 10, points);
+
+                n = kMeans.GetKMeansNewCentroid();
+                cluster = kMeans.GetCluster();
+                ncentroids = kMeans.GetCentroid();
+
+                DoTriangles();
+
+                anime();
+            }
+
+            let canvas, ctx;
+            let kMeans;
+            const points = [];
+
+            window.onload = function(){
+
+                // RxFramework Load Time
+                setTimeout(init, 0);
+            }
+
+            const DoTriangles = () => {
+                trianglesPoints = [];
+                for(let i = 0; i < ncentroids.length; i++){
+                    const eachPoints = ncentroids[i].GetPoints();
+                    trianglesPoints.push(new DelaunaryTriangulation.POINT2D(eachPoints[0], eachPoints[1]))
+                }
+
+                trianglesPoints.push(new DelaunaryTriangulation.POINT2D(-window.innerWidth, -window.innerHeight));
+                trianglesPoints.push(new DelaunaryTriangulation.POINT2D(window.innerWidth * 2, -window.innerHeight));
+                trianglesPoints.push(new DelaunaryTriangulation.POINT2D(window.innerWidth * 2, window.innerHeight * 2));
+                trianglesPoints.push(new DelaunaryTriangulation.POINT2D(-window.innerWidth, window.innerHeight));
+
+                triangles = DelaunaryTriangulation.triangulate(trianglesPoints);
+
+            }
+
+            let trianglesPoints = [];
+            let triangles = [];
+
+            let n = [];
+            let cluster = [];
+            let ncentroids = [];
+            const center = [window.innerWidth / 2 , window.innerHeight / 2];
+            let mouse = { x : center[0], y : center[1] };
+
+
+            const circleRadius = 30;
+            const colorSet = [ '740938', '133E87', '31511E', 'FFCF9D', '3B1E54', '4C4B16', '37AFE1', '7AB2D3', '4A628A' ];
+
+            const update = () => { }
+
+            const anime = () => {
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                update();
+
+
+                points.forEach(each => {
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.fillStyle = 'rgba(50, 50, 50, 0.3)';
+                    ctx.arc(each.points[0], each.points[1], circleRadius/10, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.closePath();
+                    ctx.restore();
+                })
+
+                cluster.forEach((each, index) => {
+
+                    for(let i = 0; i < each.length; i++){
+                        const p = each[i].GetPoints();
+                        ctx.save();
+                        ctx.beginPath();
+                        // ctx.fillStyle = 'red';
+                        ctx.fillStyle = '#' + colorSet[index];
+                        ctx.textBaseline = 'middle';
+                        ctx.textAlign = 'center';
+                        ctx.font = '20px DynaPuff';
+                        
+                        ctx.strokeStyle = '#' + colorSet[index];
+                        ctx.arc(p[0], p[1], circleRadius/5, 0, Math.PI * 2);
+                        ctx.stroke();
+                        ctx.fillText(String(index), p[0], p[1]-10);
+                        ctx.closePath();
+                        ctx.restore();
+                    }
+
+                })
+
+
+
+                ncentroids.forEach((each, index) => {
+                    const p = each.GetPoints();
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.fillStyle = 'red';
+
+                    ctx.arc(p[0], p[1], circleRadius/10, 0, Math.PI * 2);
+
+                    ctx.textBaseline = 'middle';
+                    ctx.textAlign = 'center';
+                    ctx.font = '20px DynaPuff';
+                    ctx.fillText('c-' + String(index), p[0], p[1]-10);
+
+                    ctx.fill();
+
+                    ctx.closePath();
+                    ctx.restore();
+                })
+
+                n.forEach((each, index) => {
+                    const p = each.GetPoints();
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.fillStyle = 'green';
+                    ctx.arc(p[0], p[1], circleRadius/10, 0, Math.PI * 2);
+
+                    ctx.textBaseline = 'middle';
+                    ctx.textAlign = 'center';
+                    ctx.font = '20px DynaPuff';
+                    ctx.fillText(String(index), p[0], p[1]-10);
+
+                    ctx.fill();
+                    ctx.closePath();
+                    ctx.restore();
+                })
+
+
+                triangles.forEach(each => {
+                    each.draw(ctx);
+                })
+                
+                requestAnimationFrame(anime);
+            }
+
+
+        </script>
+
+    </head>
+
+    <body>
+
+        <div class="title">K-Means</div>
+
+        <div class="info">
+            <div> <label><span>NextStep : </span><button onclick="NextStep()">NextStep</button> </label> </div>
+            <div> <label><span>DrawCircle : </span><button onclick="DrawCircle()">DrawCircle</button> </label> </div>
+            <div> <label><span>DrawTriangle : </span><button onclick="DrawTriangle()">DrawTriangle</button> </label> </div>
+            <div> <label><span>DrawPoint : </span><button onclick="DrawPoint()">DrawPoint</button> </label> </div>
+        </div>
+
+        <div class="notice">Support By Cloud Rx (<a href='https://rxapis.com'>https://rxapis.com</a>)</div>
+
+    </body>
+</html>

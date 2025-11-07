@@ -27,6 +27,9 @@
                 padding : 10px 20px;
                 z-index: 99999;   
             }
+            .notice img {
+                width : 100px;
+            }
 
             .notice {
                 position: fixed;
@@ -34,7 +37,7 @@
                 right: 10px;
                 color : white;
                 letter-spacing: 2px;
-                background: rgba(0, 0, 0, 0.5);
+                background: rgba(0, 0, 0, 0.2);
                 padding : 10px 20px;
                 z-index: 99999;
             }
@@ -126,7 +129,6 @@
                 }
 
                 kMeans.SetKMeans(points.length / 10, points);
-
                 n = kMeans.GetKMeansNewCentroid();
                 cluster = kMeans.GetCluster();
                 ncentroids = kMeans.GetCentroid();
@@ -268,7 +270,9 @@
 
     <body>
 
-        <div class="title">K-Means</div>
+        <div class="title">K-Means
+            
+        </div>
 
         <div class="info">
             <div> <label><span>NextStep : </span><button onclick="NextStep()">NextStep</button> </label> </div>
@@ -277,7 +281,10 @@
             <div> <label><span>DrawPoint : </span><button onclick="DrawPoint()">DrawPoint</button> </label> </div>
         </div>
 
-        <div class="notice">Support By Cloud Rx (<a href='https://rxapis.com'>https://rxapis.com</a>)</div>
+        <div class="notice">Support By Cloud Rx (<a href='https://novelpie.org'>https://novelpie.org
+                <img src="./animeNews.png" />
+            </a>)
+        </div>
 
     </body>
 </html>
